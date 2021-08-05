@@ -8,17 +8,12 @@ class Examples(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Logged in')
-        print(f'Ready: {self.bot.user} | Servers: {len(self.bot.guilds)}')
-
-    @commands.command()
+    @commands.command(hidden=True)
     async def add(self, ctx, left: int, right: int):
         """Adds two numbers together."""
         await ctx.send(left + right)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def roll(self, ctx, dice: str):
         """Rolls a dice in NdN format."""
         try:
@@ -30,18 +25,18 @@ class Examples(commands.Cog):
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
         await ctx.send(result)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def choose(self, ctx, *choices: str):
         """Chooses between multiple choices."""
         await ctx.send(random.choice(choices))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def repeat(self, ctx, times: int, content='repeating...'):
         """Repeats a message multiple times."""
         for i in range(times):
             await ctx.send(content)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def joined(self, ctx, member: discord.Member):
         """Says when a member joined."""
         await ctx.send('{0.name} joined in {0.joined_at}'.format(member))

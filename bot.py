@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Bot kwargs 초기화
 bot = commands.Bot(
     command_prefix='유리! ',
-    description='Prefix: "유리! "',
+    description='하나 둘 셋에 정말좋아요',
     owner_id=226671028460322818,
     allowed_mentions=discord.AllowedMentions(
         everyone=False, users=True, roles=False, replied_user=True
