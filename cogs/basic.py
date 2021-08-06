@@ -27,7 +27,9 @@ class BasicCommands(commands.Cog):
         # 스포일러(||) 보존
         content_ = ' '.join(content)
         if content_.count('||') % 2 == 1:
-            '\\||'.join(content_.rsplit('||', 1))
+            idx = content_.rfind('||')
+            if idx != -1:
+                content_ = content_[:idx] + '\\||' + content_[idx+2:]
 
         await ctx.send(content_ + ' || by '+ctx.author.mention+'||')
 
