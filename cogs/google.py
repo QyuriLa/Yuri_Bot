@@ -24,17 +24,26 @@ class GoogleCommands(commands.Cog):
 
         def update_ids():
             # YouTube API
-            request = yt_api_build().playlistItems().list(
-                part="contentDetails",
-                maxResults=50,
-                playlistId="PLt4PlBZPJX7EFiE_D2hjgiH712J95SjVc"
-            )
-            response = request.execute()
-
-            # ids에 영상 ID들을 append하고 pickle로 저장
             ids = []
-            for i in range(len(response['items'])):
-                ids.append(response['items'][i]['contentDetails']['videoId'])
+            page_token = None
+            while True:
+                request = yt_api_build().playlistItems().list(
+                    part="contentDetails",
+                    maxResults=50,
+                    pageToken=page_token,
+                    playlistId="PLt4PlBZPJX7EFiE_D2hjgiH712J95SjVc"
+                )
+                response = request.execute()
+
+                # ids에 영상 ID들을 append하고 pickle로 저장
+                for i in range(len(response['items'])):
+                    ids.append(response['items'][i]['contentDetails']['videoId'])
+
+                # 다음 페이지
+                try:
+                    page_token = response['nextPageToken']
+                except KeyError:
+                    break
 
             with open('data/track_recommend_ids.pkl', 'wb') as f:
                 pickle.dump(ids, f)
