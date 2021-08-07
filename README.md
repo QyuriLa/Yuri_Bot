@@ -4,6 +4,6 @@
 
 ## Ref
 
-https://discordpy.readthedocs.io/en/latest/index.html#getting-started
-https://realpython.com/how-to-make-a-discord-bot-python/
-https://github.com/AlexFlipnote/discord_bot.py/blob/master/index.py
+- https://discordpy.readthedocs.io/en/latest/index.html#getting-started
+- https://realpython.com/how-to-make-a-discord-bot-python/
+- https://github.com/AlexFlipnote/discord_bot.py/blob/master/index.py
