@@ -45,9 +45,11 @@ class BasicCommands(commands.Cog):
     @commands.command(name='지워줘')
     async def delete(self, ctx, num=1):
         """싹 지워드립니다"""
+        messages = []
         async for message in ctx.channel.history(
                 limit=num, before=ctx.message.created_at):
-            await message.delete()
+            messages.append(message)
+        await ctx.channel.delete_messages(messages)
 
 
 def setup(bot):
