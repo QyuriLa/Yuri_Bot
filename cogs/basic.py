@@ -42,6 +42,13 @@ class BasicCommands(commands.Cog):
         # TODO 단어 종성에 따라 후치사 결정
         await ctx.send(f'음... **{random.choice(args)}** 쪽이 좋지 않아?')
 
+    @commands.command(name='지워줘')
+    async def delete(self, ctx, num=1):
+        """싹 지워드립니다"""
+        async for message in ctx.channel.history(
+                limit=num, before=ctx.message.created_at):
+            await message.delete()
+
 
 def setup(bot):
     bot.add_cog(BasicCommands(bot))
