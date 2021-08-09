@@ -1,5 +1,5 @@
 import time
-
+import random
 import discord
 from discord.ext import commands
 
@@ -32,6 +32,15 @@ class BasicCommands(commands.Cog):
                 content_ = content_[:idx] + '\\||' + content_[idx+2:]
 
         await ctx.send(content_ + ' || by '+ctx.author.mention+'||')
+
+    @commands.command(name='골라줘')
+    async def choose(self, ctx, *args):
+        """골라드립니다"""
+        if not args:
+            return
+
+        # TODO 단어 종성에 따라 후치사 결정
+        await ctx.send(f'음... **{random.choice(args)}** 쪽이 좋지 않아?')
 
 
 def setup(bot):
