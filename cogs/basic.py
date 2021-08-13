@@ -67,7 +67,8 @@ class BasicCommands(commands.Cog):
                               '- 다른 봇이나 나를 위한 명령어에는 답장하지 않아!',
                         inline=False)
         embed.add_field(name='지정 채널',
-                        value=' / '.join(map(lambda x: x.mention, channels)),
+                        value=' / '.join(map(lambda x: x.mention, channels))
+                              or '`(발견되지 않음)`',
                         inline=False)
         embed.add_field(name='베타 안내',
                         value='지금은 챗봇 API의 샘플을 그대로 쓰고 있어서, '
