@@ -1,0 +1,15 @@
+{
+  "activity": "여행",
+  "activity_type": "playing|watching|listening|competing",
+  "status_type": "online|idle|dnd",
+  "bot_whitelist": [
+    872727152896929812
+  ],
+  "pingpong_channels": [
+    874295853446201444,
+    875441248566120538
+  ],
+  "other_bot_cmds": [
+    "ㅅㅂㅁㅌ", "놀자", "따라하기", "레옹", "만화", "설명", "오리", "찍어"
+  ]
+}
