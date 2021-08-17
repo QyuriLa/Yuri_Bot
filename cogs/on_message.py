@@ -44,7 +44,7 @@ async def pingpong_chat(message):
     if not message.content:
         return
 
-    session_id = 114514  # TODO - ID 재설정 명령어
+    session_id = message.channel.id  # TODO - ID 재설정 명령어
     await message.channel.trigger_typing()
 
     response = pingpong.request(message.content, session_id)

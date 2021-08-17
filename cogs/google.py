@@ -1,10 +1,8 @@
 import datetime as dt
 import random
 import pickle
-
 import discord
 from discord.ext import commands
-
 from utils.google_api import yt_api_build
 
 
