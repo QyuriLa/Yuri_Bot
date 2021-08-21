@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+import datetime as dt
 import io
 import aiohttp
 
@@ -71,7 +71,6 @@ async def pingpong_chat(message):
 async def pin_backup(origin, dest):
     pins = await origin.pins()
 
-
     for msg in pins:
         # 첨부파일 다운로드 및 첨부
         files = []
@@ -79,15 +78,19 @@ async def pin_backup(origin, dest):
             for file in msg.attachments:
                 files.append(await _get_attachment(file, msg))
 
+        # 메시지 전송 시 멘션 및 타임스탬프를 스포일러 처리하여 추가
+        # 「||@릴라, 3시간 전||」
+        msg_time = msg.created_at + dt.timedelta(hours=9)
         new_msg = await dest.send(
             content=msg.content +
                     f'\n||「{msg.author.mention}, '
-                    f'<t:{int(dt.timestamp(msg.created_at))}:R>」||',
+                    f'<t:{int(dt.datetime.timestamp(msg_time))}:R>」||',
             files=files or None,
             allowed_mentions=discord.AllowedMentions.none()
         )
 
-        if new_msg:
+        # 오류로 첨부파일 개수가 맞지 않으면 unpit()을 실행하지 않음
+        if new_msg and len(new_msg.attachments) == len(msg.attachments):
             await msg.unpin()
 
 
