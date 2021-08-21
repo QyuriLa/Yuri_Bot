@@ -1,3 +1,7 @@
+from datetime import datetime as dt
+import io
+import aiohttp
+
 import discord
 from discord.ext import commands
 
@@ -21,6 +25,13 @@ class OnMessage(commands.Cog):
 
         if message.channel.id in self.config["pingpong_channels"]:
             await pingpong_chat(message)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_pins_update(self, channel, last_pin):
+        for i in self.config["pin_backup_channels"]:
+            if self.bot.get_channel(i[0]) == channel:
+                await pin_backup(self.bot.get_channel(i[0]),
+                                 self.bot.get_channel(i[1]))
 
 
 async def react_to_chito(message):
@@ -55,6 +66,43 @@ async def pingpong_chat(message):
         elif reply['type'] == 'image':
             content = reply['image']['url']
         await message.channel.send(content if content else '⚠')
+
+
+async def pin_backup(origin, dest):
+    pins = await origin.pins()
+
+
+    for msg in pins:
+        # 첨부파일 다운로드 및 첨부
+        files = []
+        if msg.attachments:
+            for file in msg.attachments:
+                files.append(await _get_attachment(file, msg))
+
+        new_msg = await dest.send(
+            content=msg.content +
+                    f'\n||「{msg.author.mention}, '
+                    f'<t:{int(dt.timestamp(msg.created_at))}:R>」||',
+            files=files or None,
+            allowed_mentions=discord.AllowedMentions.none()
+        )
+
+        if new_msg:
+            await msg.unpin()
+
+
+async def _get_attachment(attachment, message):
+    # Ref: https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-upload-an-image
+    async with aiohttp.ClientSession() as session:
+        async with session.get(attachment.proxy_url) as resp:
+            if resp.status != 200:
+                return await message.channel.send(
+                    f'고정 메시지 백업 실패 - {message.jump_url}\n'
+                    '사유: 파일 다운로드 실패'
+                )
+            return discord.File(io.BytesIO(await resp.read()),
+                                attachment.filename,
+                                spoiler=attachment.is_spoiler())
 
 
 def setup(bot):
