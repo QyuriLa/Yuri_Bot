@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+import datetime as dt
 import io
 import aiohttp
 
@@ -79,10 +79,11 @@ async def pin_backup(origin, dest):
             for file in msg.attachments:
                 files.append(await _get_attachment(file, msg))
 
+        msg_time = msg.created_at + dt.timedelta(hours=9)
         new_msg = await dest.send(
             content=msg.content +
                     f'\n||「{msg.author.mention}, '
-                    f'<t:{int(dt.timestamp(msg.created_at))}:R>」||',
+                    f'<t:{int(dt.datetime.timestamp(msg_time))}:R>」||',
             files=files or None,
             allowed_mentions=discord.AllowedMentions.none()
         )
