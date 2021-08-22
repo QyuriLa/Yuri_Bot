@@ -87,7 +87,7 @@ async def pin_backup(origin, dest):
             allowed_mentions=discord.AllowedMentions.none()
         )
 
-        if new_msg and len(new_msg.attachments) == len(msg.attachments):
+        if new_msg:
             await msg.unpin()
 
 
