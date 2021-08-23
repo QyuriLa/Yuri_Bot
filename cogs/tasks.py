@@ -60,12 +60,17 @@ async def _archive_message(dest, message):
     )
 
     # 메시지 전송 및 전송한 메시지 반환
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(
+        url=message.jump_url, label='바로 가기', emoji='🔗'
+    ))
     return await dest.send(
         content=message.content +
                 f'\n||「{message.author.mention}, '
                 f'<t:{int(msg_timestamp)}:R>」||',
         files=files or None,
-        allowed_mentions=discord.AllowedMentions.none()
+        allowed_mentions=discord.AllowedMentions.none(),
+        view=view
     )
 
 
