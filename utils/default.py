@@ -93,10 +93,10 @@ def next_sharp_datetime(now, unit, cycle):
     dt.datetime
     """
     if unit in (0, 1):
-        if cycle % 60 != 0:
+        if 60 % cycle != 0:
             raise ValueError('cycle이 60의 약수가 아닙니다.')
     elif unit == 2:
-        if cycle % 24 != 0:
+        if 24 % cycle != 0:
             raise ValueError('cycle이 24의 약수가 아닙니다.')
     else:
         raise ValueError(
