@@ -56,7 +56,7 @@ async def _archive_message(dest, message):
 
     # 메시지에 덧붙일 타임스탬프 생성
     msg_timestamp = dt.datetime.timestamp(
-        message.created_at + dt.timedelta(hours=9)
+        message.created_at  # + dt.timedelta(hours=9) : 로컬 구동 시 필요
     )
 
     # 메시지 전송 및 전송한 메시지 반환
