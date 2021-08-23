@@ -1,3 +1,4 @@
+import datetime as dt
 import time
 import json
 import discord
@@ -73,3 +74,57 @@ async def prettyResults(ctx, filename: str = "Results", resultmsg: str = "Here's
         content=resultmsg,
         file=discord.File(data, filename=timetext(filename.title()))
     )
+
+
+def next_sharp_datetime(now, unit, cycle):
+    """자정을 기준으로, 주기에 맞는 바로 다음 datetime을 반환합니다.
+
+    Parameters
+    ----------
+    now: dt.datetime
+    unit: int
+        cycle의 시간 단위를 특정합니다.
+        0: 초, 1: 분, 2: 시
+    cycle: int
+        unit이 0 or 1이라면 60, 2라면 24의 약수여야 합니다.
+
+    Returns
+    -------
+    dt.datetime
+    """
+    if unit in (0, 1):
+        if cycle % 60 != 0:
+            raise ValueError('cycle이 60의 약수가 아닙니다.')
+    elif unit == 2:
+        if cycle % 24 != 0:
+            raise ValueError('cycle이 24의 약수가 아닙니다.')
+    else:
+        raise ValueError(
+            'unit 값이 유효하지 않습니다. unit은 0, 1 또는 2여야 합니다.'
+        )
+
+    if unit == 0:
+        new_second = (now.second // cycle + 1) * cycle
+        if new_second == 60:
+            now.replace(second=0)
+            now += dt.timedelta(minutes=1)
+        else:
+            now.replace(second=new_second)
+
+    elif unit == 1:
+        new_minute = (now.minute // cycle + 1) * cycle
+        if new_minute == 60:
+            now.replace(minute=0)
+            now += dt.timedelta(hours=1)
+        else:
+            now.replace(second=new_minute)
+
+    elif unit == 2:
+        new_hour = (now.hour // cycle + 1) * cycle
+        if new_hour == 24:
+            now.replace(hour=0)
+            now += dt.timedelta(days=1)
+        else:
+            now.replace(second=new_hour)
+
+    return now
