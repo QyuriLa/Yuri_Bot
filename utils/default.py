@@ -103,28 +103,25 @@ def next_sharp_datetime(now, unit, cycle):
             'unit 값이 유효하지 않습니다. unit은 0, 1 또는 2여야 합니다.'
         )
 
+    new_dt: dt.datetime
     if unit == 0:
         new_second = (now.second // cycle + 1) * cycle
+        new_dt = now.replace(second=new_second % 60)
         if new_second == 60:
-            now.replace(second=0)
-            now += dt.timedelta(minutes=1)
-        else:
-            now.replace(second=new_second)
+            new_dt += dt.timedelta(minutes=1)
 
     elif unit == 1:
         new_minute = (now.minute // cycle + 1) * cycle
+        new_dt = now.replace(minute=new_minute % 60)
         if new_minute == 60:
-            now.replace(minute=0)
-            now += dt.timedelta(hours=1)
-        else:
-            now.replace(second=new_minute)
+            new_dt += dt.timedelta(hours=1)
 
     elif unit == 2:
         new_hour = (now.hour // cycle + 1) * cycle
+        new_dt = now.replace(hour=new_hour % 24)
         if new_hour == 24:
-            now.replace(hour=0)
-            now += dt.timedelta(days=1)
-        else:
-            now.replace(second=new_hour)
+            new_dt += dt.timedelta(days=1)
 
-    return now
+    return new_dt.replace(minute=0 if unit == 2 else new_dt.minute,
+                          second=0 if unit >= 1 else new_dt.second,
+                          microsecond=0)
