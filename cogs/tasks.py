@@ -2,6 +2,7 @@ import asyncio
 import datetime as dt
 import aiohttp
 import io
+import re
 
 import discord
 from discord.ext import commands, tasks
@@ -26,7 +27,7 @@ class Tasks(commands.Cog):
                 if exceptions and msg.id in exceptions:
                     return
 
-                new_msg = await _archive_message(channels[1], msg)
+                new_msg = await _archive_message(self.bot, channels[1], msg)
 
                 # 첨부파일 개수가 같을 때만 unpin() 실행
                 if new_msg and len(new_msg.attachments) == len(msg.attachments):
@@ -48,30 +49,51 @@ class Tasks(commands.Cog):
         await asyncio.sleep(timedelta.total_seconds())
 
 
-async def _archive_message(dest, message):
-    # 첨부파일 다운로드
+async def _archive_message(bot, dest, message):
+    # 첨부파일 다운로드 및 첨부 준비
     files = []
     for file in message.attachments:
         files.append(await _get_attachment(file, message))
 
-    # 메시지에 덧붙일 타임스탬프 생성
-    msg_timestamp = dt.datetime.timestamp(
-        message.created_at  # + dt.timedelta(hours=9) : 로컬 구동 시 필요
+    # 바로 가기 버튼 생성
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(url=message.jump_url,
+                                    label='바로 가기', emoji='🔗'))
+
+    # 사용 불가 이모지 '▪'로 교체
+    new_content = message.content
+    are_there_unusable = False
+    pattern = re.compile(r'<a?:\w*:(\d*)>')
+
+    emoji_ids = set(pattern.findall(new_content))
+    for id_ in emoji_ids:
+        if not bot.get_emoji(id_):
+            are_there_unusable = True
+            new_content = re.sub(rf'<a?:\w*:{id_}>', '▪', new_content)
+
+    before_len = len(new_content)  # 2000자 초과 검사 시 사용
+
+    if are_there_unusable:
+        new_content += ' *(외부 이모지 교체됨)*'
+
+    # new_content 끝에 타임스탬프 추가
+    msg_ts = dt.datetime.timestamp(
+        message.created_at  # + dt.timedelta(hours=9) : 로컬 구동 시 필요?
     )
+    new_content += f'\n||「{message.author.mention}, <t:{int(msg_ts)}:R>」||'
+
+    # new_content가 2000자 초과 시 뒤에 '…*(후략)*' 삽입
+    if len(new_content) > 2000:
+        omit = len(new_content) - 2000 + len('…*(후략)*')
+        new_content = (new_content[:before_len-omit]
+                       + '…*(후략)*'
+                       + new_content[before_len:])
 
     # 메시지 전송 및 전송한 메시지 반환
-    view = discord.ui.View()
-    view.add_item(discord.ui.Button(
-        url=message.jump_url, label='바로 가기', emoji='🔗'
-    ))
-    return await dest.send(
-        content=message.content +
-                f'\n||「{message.author.mention}, '
-                f'<t:{int(msg_timestamp)}:R>」||',
-        files=files or None,
-        allowed_mentions=discord.AllowedMentions.none(),
-        view=view
-    )
+    return await dest.send(content=new_content,
+                           files=files or None,
+                           allowed_mentions=discord.AllowedMentions.none(),
+                           view=view)
 
 
 async def _get_attachment(attachment, message):
