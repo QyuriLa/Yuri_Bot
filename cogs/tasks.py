@@ -1,3 +1,4 @@
+import asyncio
 import datetime as dt
 import aiohttp
 import io
@@ -12,8 +13,9 @@ class Tasks(commands.Cog):
     def __init__(self, bot):
         self.config = default.config()
         self.bot = bot
+        self.archive_pins.start()
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=10)
     async def archive_pins(self):
         for ids in self.config["pin_backup_channels"]:
             channels = [self.bot.get_channel(x) for x in ids]
@@ -31,12 +33,19 @@ class Tasks(commands.Cog):
                     await msg.unpin()
                 else:
                     await channels[0].send(
-                        f'이런, 고정 메시지 아카이빙 중에 문제가 생겼어! '
+                        f'이런, 고정 메시지 아카이빙 중에 문제가 생겼어!\n'
                         '고정 해제는 하지 않을게―',
-                        embed=discord.Embed(title='해당 메시지로 바로가기',
+                        embed=discord.Embed(title='해당 메시지로 바로 가기',
                                             colour=discord.Color.red,
                                             url=msg.jump_url)
                     )
+
+    @archive_pins.before_loop
+    async def before_archive_pins(self):
+        await self.bot.wait_until_ready()
+        now = dt.datetime.now()
+        timedelta = default.next_sharp_datetime(now, 1, 10) - now
+        await asyncio.sleep(timedelta.total_seconds())
 
 
 async def _archive_message(dest, message):
