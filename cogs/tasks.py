@@ -25,9 +25,9 @@ class Tasks(commands.Cog):
             for msg in pins:
                 # config에 등록된 제외 메시지는 제외
                 if exceptions and msg.id in exceptions:
-                    return
+                    continue
 
-                new_msg = await _archive_message(self.bot, channels[1], msg)
+                new_msg = await _archive_msg(self.bot, channels[1], msg)
 
                 # 첨부파일 개수가 같을 때만 unpin() 실행
                 if new_msg and len(new_msg.attachments) == len(msg.attachments):
@@ -49,11 +49,20 @@ class Tasks(commands.Cog):
         await asyncio.sleep(timedelta.total_seconds())
 
 
-async def _archive_message(bot, dest, message):
+async def _archive_msg(bot, dest: discord.abc.Messageable,
+                       message: discord.Message):
+    are_there_large_files = False
+    are_there_unusable_emojis = False
+
     # 첨부파일 다운로드 및 첨부 준비
     files = []
+    large_filenames = []
     for file in message.attachments:
-        files.append(await _get_attachment(file, message))
+        if file.size < message.guild.filesize_limit:
+            files.append(await _get_attachment(file, message))
+        else:
+            are_there_large_files = True
+            large_filenames.append(file.filename)
 
     # 바로 가기 버튼 생성
     view = discord.ui.View()
@@ -62,19 +71,23 @@ async def _archive_message(bot, dest, message):
 
     # 사용 불가 이모지 '▪'로 교체
     new_content = message.content
-    are_there_unusable = False
     pattern = re.compile(r'<a?:\w*:(\d*)>')
 
     emoji_ids = set(pattern.findall(new_content))
     for id_ in emoji_ids:
         if not bot.get_emoji(id_):
-            are_there_unusable = True
+            are_there_unusable_emojis = True
             new_content = re.sub(rf'<a?:\w*:{id_}>', '▪', new_content)
 
     before_len = len(new_content)  # 2000자 초과 검사 시 사용
 
-    if are_there_unusable:
+    # 꼬리말 추가
+    if are_there_unusable_emojis:
         new_content += ' *(외부 이모지 교체됨)*'
+    if are_there_large_files:
+        new_content += (
+            f'\n*(누락된 용량 제한 초과 파일: `{", ".join(large_filenames)}`)*'
+        )
 
     # new_content 끝에 타임스탬프 추가
     msg_ts = dt.datetime.timestamp(
@@ -90,10 +103,13 @@ async def _archive_message(bot, dest, message):
                        + new_content[before_len:])
 
     # 메시지 전송 및 전송한 메시지 반환
-    return await dest.send(content=new_content,
-                           files=files or None,
-                           allowed_mentions=discord.AllowedMentions.none(),
-                           view=view)
+    try:
+        return await dest.send(content=new_content,
+                               files=files or None,
+                               allowed_mentions=discord.AllowedMentions.none(),
+                               view=view)
+    except discord.errors.HTTPException:
+        pass
 
 
 async def _get_attachment(attachment, message):
