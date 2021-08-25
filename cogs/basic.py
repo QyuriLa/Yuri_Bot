@@ -55,7 +55,7 @@ class BasicCommands(commands.Cog):
         await ctx.channel.delete_messages(messages)
 
     @commands.command(name='대화하자')
-    async def delete(self, ctx):
+    async def talk(self, ctx):
         """핑퐁 빌더 챗봇 안내 임베드를 출력합니다."""
         channels = filter(lambda x: x.id in self.config["pingpong_channels"],
                           ctx.guild.channels)
