@@ -27,19 +27,12 @@ class Tasks(commands.Cog):
                 if exceptions and msg.id in exceptions:
                     continue
 
-                new_msg = await _archive_msg(self.bot, channels[1], msg)
-
-                # 첨부파일 개수가 같을 때만 unpin() 실행
-                if new_msg and len(new_msg.attachments) == len(msg.attachments):
-                    await msg.unpin()
+                try:
+                    new_msg = await _archive_msg(self.bot, channels[1], msg)
+                except Exception as exc:
+                    print(f'고정 아카이브 중 예외 발생: {type(exc)}: {exc}')
                 else:
-                    await channels[0].send(
-                        f'이런, 고정 메시지 아카이빙 중에 문제가 생겼어!\n'
-                        '고정 해제는 하지 않을게―',
-                        embed=discord.Embed(title='해당 메시지로 바로 가기',
-                                            colour=discord.Color.red,
-                                            url=msg.jump_url)
-                    )
+                    await msg.unpin()
 
     @archive_pins.before_loop
     async def before_archive_pins(self):
