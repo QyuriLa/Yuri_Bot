@@ -109,6 +109,13 @@ async def _get_attachment(attachment, message):
     # Ref: https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-upload-an-image
     async with aiohttp.ClientSession() as session:
         async with session.get(attachment.proxy_url) as resp:
+            if resp.status == 200:
+                return discord.File(io.BytesIO(await resp.read()),
+                                    attachment.filename,
+                                    spoiler=attachment.is_spoiler())
+
+        # proxy_url에서 파일을 받아오지 못한 경우 (보통 non-media)
+        async with session.get(attachment.url) as resp:
             if resp.status != 200:
                 await message.channel.send(
                     '고정 메시지 백업 실패 - 첨부파일 다운로드 실패\n'
