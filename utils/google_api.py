@@ -22,7 +22,7 @@ def yt_api_build():
     #     client_secrets_file, scopes)
     # credentials = flow.run_console()
     return googleapiclient.discovery.build(
-        'youtube', 'v3', developerKey=os.getenv('GOOGLE_DEVELOPER_KEY')
+        'youtube', 'v3', developerKey=os.getenv('GOOGLE_DEV_KEY')
     )
 
 
