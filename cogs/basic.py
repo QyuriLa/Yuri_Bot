@@ -46,8 +46,12 @@ class BasicCommands(commands.Cog):
         await ctx.send(f'음... **{random.choice(args)}** 쪽이 좋지 않아?')
 
     @commands.command(name='지워줘')
-    async def delete(self, ctx, num=1):
-        """싹 지워드립니다"""
+    async def delete(self, ctx: commands.Context, num=1):
+        """입력한 수만큼의 메시지를 가차없이 지워 줄게, 후후후..."""
+        if not ctx.channel.permissions_for(ctx.author).manage_messages:
+            await ctx.send('어이, 너 메시지 삭제 권한이 없잖아!')
+            return
+
         messages = []
         async for message in ctx.channel.history(
                 limit=num, before=ctx.message.created_at):
