@@ -19,3 +19,7 @@ class DevelopCommands(commands.Cog):
         os.remove('data/config.hjson')
         default.config()
         await ctx.send('config 새로고침 완료!')
+
+
+def setup(bot):
+    bot.add_cog(DevelopCommands(bot))
