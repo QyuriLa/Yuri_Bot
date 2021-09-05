@@ -16,13 +16,13 @@ class BasicCommands(commands.Cog):
         """보이지않아짐"""
         msg = await ctx.send('보이지않아')
         for i in range(3, 8):
-            time.sleep(0.2)
+            time.sleep(0.3)
             content = '||보이지않아'
             await msg.edit(content=content[:i]+'||'+content[i:])
 
     @commands.command(name='말해줘')
     async def speak(self, ctx, *content):
-        """대신 말해드립니다"""
+        """응? 따라 말해 보라고?"""
         if not content:
             return
         await ctx.message.delete()
@@ -38,7 +38,7 @@ class BasicCommands(commands.Cog):
 
     @commands.command(name='골라줘')
     async def choose(self, ctx, *args):
-        """골라드립니다"""
+        """단어들을 띄어쓰기로 구분해서 입력하면 하나를 골라 줄게!"""
         if not args:
             return
 
@@ -60,7 +60,7 @@ class BasicCommands(commands.Cog):
 
     @commands.command(name='대화하자')
     async def talk(self, ctx):
-        """핑퐁 빌더 챗봇 안내 임베드를 출력합니다."""
+        """핑퐁 빌더 챗봇 안내 임베드를 출력해 줄게!"""
         channels = filter(lambda x: x.id in self.config["pingpong_channels"],
                           ctx.guild.channels)
         embed = discord.Embed(title='좋아, 이야기하자!', colour=14669221)
