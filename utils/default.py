@@ -16,6 +16,8 @@ def config(filename: str = "config"):
         with open(f'data/{filename}.hjson', encoding='utf8') as f:
             return hjson.loads(f.read())
     except FileNotFoundError:
+        if not os.path.isdir('data'):
+            os.mkdir('data')
         key = os.getenv('PB_CONFIG_PASTE_KEY')
         res = requests.get('https://pastebin.com/raw/' + key)
         if res.status_code == 200:
