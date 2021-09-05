@@ -19,7 +19,7 @@ def config(filename: str = "config"):
         key = os.getenv('PB_CONFIG_PASTE_KEY')
         res = requests.get('https://pastebin.com/raw/' + key)
         if res.status_code == 200:
-            with open(f'data/{filename}.hjson', 'w', encoding='utf8') as f:
+            with open(f'data/{filename}.hjson', 'x', encoding='utf8') as f:
                 f.write(res.text)
             return hjson.loads(res.text)
         else:
