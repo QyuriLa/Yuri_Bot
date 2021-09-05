@@ -1,10 +1,10 @@
 import datetime as dt
 import time
-import json
 import discord
 import traceback
 import timeago as timesince
-
+import requests
+import os
 from io import BytesIO
 
 import hjson
@@ -16,7 +16,14 @@ def config(filename: str = "config"):
         with open(f'data/{filename}.hjson', encoding='utf8') as f:
             return hjson.loads(f.read())
     except FileNotFoundError:
-        raise FileNotFoundError("JSON file wasn't found")
+        key = os.getenv('PB_CONFIG_PASTE_KEY')
+        res = requests.get('https://pastebin.com/raw/' + key)
+        if res.status_code == 200:
+            with open(f'data/{filename}.hjson', 'w', encoding='utf8') as f:
+                f.write(res.text)
+            return hjson.loads(res.text)
+        else:
+            raise Exception(f'Pastebin에서 {filename}.hjson을 불러오지 못했습니다.')
 
 
 def traceback_maker(err, advance: bool = True):
