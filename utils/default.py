@@ -7,12 +7,14 @@ import timeago as timesince
 
 from io import BytesIO
 
+import hjson
+
 
 def config(filename: str = "config"):
     """ Fetch default config file """
     try:
-        with open(f"data/{filename}.json", encoding='utf8') as data:
-            return json.load(data)
+        with open(f'data/{filename}.hjson', encoding='utf8') as f:
+            return hjson.loads(f.read())
     except FileNotFoundError:
         raise FileNotFoundError("JSON file wasn't found")
 
