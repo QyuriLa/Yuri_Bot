@@ -2,19 +2,23 @@ import asyncio
 import datetime as dt
 import aiohttp
 import io
+import random
 import re
+from typing import Optional
 
 import discord
 from discord.ext import commands, tasks
+from PIL import Image, ImageDraw, ImageFont
 
 from utils import default
 
 
 class Tasks(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.config = default.config()
         self.bot = bot
         self.archive_pins.start()
+        self.daily_arrest.start()
 
     @tasks.loop(minutes=10)
     async def archive_pins(self):
@@ -39,6 +43,64 @@ class Tasks(commands.Cog):
         await self.bot.wait_until_ready()
         now = dt.datetime.now()
         timedelta = default.next_sharp_datetime(now, 1, 10) - now
+        await asyncio.sleep(timedelta.total_seconds())
+
+    @tasks.loop(hours=24)
+    async def daily_arrest(self):
+        channel: Optional[discord.TextChannel] = None
+        for id_ in self.config["daily_arrest_channels"]:
+            if self.bot.get_channel(id_):
+                channel = self.bot.get_channel(id_)
+                break
+        if not channel:
+            return
+        guild = channel.guild
+        member = random.choice([x for x in guild.members if not x.bot])
+
+        # 이미지 생성
+        with Image.open('data/daily_arrest-in.jpg') as img:
+            draw = ImageDraw.Draw(img)
+            font = ImageFont.truetype('data/NanumSquareB.ttf', 90)
+            draw.text((1420, 950), f'{member.display_name}',
+                      font=font, anchor='rs', stroke_width=5, stroke_fill=0)
+            img.save(f'data/daily_arrest-out.jpg', 'JPEG')
+
+        now = dt.datetime.now().strftime('%y%m%d')
+        message = await channel.send(member.mention, file=discord.File(
+                f'data/daily_arrest-out.jpg', f'{now}.jpg'
+            ))
+
+        # 체포 역할 생성
+        arrested_role = await guild.create_role(
+            name='체포', color=discord.Color.darker_gray(), hoist=True
+        )
+        temp_roles = []
+        for role in member.roles:
+            if role.is_assignable() and not role.is_default():
+                temp_roles.append(role)
+                await member.remove_roles(role)
+        await member.add_roles(arrested_role)
+        for ch in guild.channels:
+            if ch.permissions_for(arrested_role).send_messages:
+                await ch.set_permissions(arrested_role,
+                                         send_messages=False,
+                                         manage_permissions=False)
+
+        # 10분 경과 후 역할 복구 및 체포 역할 삭제
+        await asyncio.sleep(600)
+        for role in temp_roles:
+            await member.add_roles(role)
+        await arrested_role.delete()
+        await message.edit(content=member.mention+' (석방됨)')
+
+    @daily_arrest.before_loop
+    async def before_daily_arrest(self):
+        await self.bot.wait_until_ready()
+        now = dt.datetime.now()
+        timedelta = (default.next_sharp_datetime(now, 2, 24) - now
+                     + dt.timedelta(days=-1, hours=21, minutes=35))
+        if timedelta < dt.timedelta():
+            timedelta += dt.timedelta(days=1)
         await asyncio.sleep(timedelta.total_seconds())
 
 
