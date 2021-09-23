@@ -29,12 +29,12 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 # Cogs 로드
+load_dotenv()
 for file in os.listdir("cogs"):
     if file.endswith(".py"):
         name = file[:-3]
         bot.load_extension(f"cogs.{name}")
 
 # Token 로드 및 봇 실행
-load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 bot.run(TOKEN)
