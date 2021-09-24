@@ -13,6 +13,9 @@ from PIL import Image, ImageDraw, ImageFont
 from utils import default
 
 
+KST = dt.timezone(dt.timedelta(hours=9))
+
+
 class Tasks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.config = default.config()
@@ -45,7 +48,7 @@ class Tasks(commands.Cog):
         timedelta = default.next_sharp_datetime(now, 1, 10) - now
         await asyncio.sleep(timedelta.total_seconds())
 
-    @tasks.loop(hours=24)
+    @tasks.loop(time=dt.time(hour=21, minute=35, tzinfo=KST))
     async def daily_arrest(self):
         channel: Optional[discord.TextChannel] = None
         for id_ in self.config["daily_arrest_channels"]:
@@ -92,16 +95,6 @@ class Tasks(commands.Cog):
             await member.add_roles(role)
         await arrested_role.delete()
         await message.edit(content=member.mention+' (석방됨)')
-
-    @daily_arrest.before_loop
-    async def before_daily_arrest(self):
-        await self.bot.wait_until_ready()
-        now = dt.datetime.now()
-        timedelta = (default.next_sharp_datetime(now, 2, 24) - now
-                     + dt.timedelta(days=-1, hours=21, minutes=35))
-        if timedelta < dt.timedelta():
-            timedelta += dt.timedelta(days=1)
-        await asyncio.sleep(timedelta.total_seconds())
 
 
 async def _archive_msg(bot, dest: discord.abc.Messageable,
