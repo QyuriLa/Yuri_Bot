@@ -1,4 +1,4 @@
-import time
+import asyncio
 import random
 import re
 
@@ -27,9 +27,10 @@ class BasicCommands(commands.Cog):
 
         actual_len = len(re.sub(r'(<a?:\w*:(\d*)>)', '0', arg))
         if actual_len > 50:
-            await ctx.send('어이! 너무 길다구!')
+            await ctx.send('어이! 너무 길다구! `(최대 50자)`')
             return
-        msg = await ctx.send(arg)
+        else:
+            msg = await ctx.send(arg)
 
         passing_emoji = False
         for i in range(len(arg)):
@@ -41,7 +42,7 @@ class BasicCommands(commands.Cog):
                 passing_emoji = False
 
             if not passing_emoji:
-                time.sleep(60 / 145)  # BPM 145
+                await asyncio.sleep(60 / 145)  # BPM 145
                 await msg.edit(content='||'+arg[:i+1]+'||'+arg[i+1:])
 
     @commands.command(name='말해줘')
