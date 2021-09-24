@@ -1,5 +1,7 @@
 import time
 import random
+import re
+
 import discord
 from discord.ext import commands
 
@@ -12,13 +14,35 @@ class BasicCommands(commands.Cog):
         self.config = default.config()
 
     @commands.command(name='샤를')
-    async def charles(self, ctx):
+    async def charles(self, ctx, *, arg='보이지않아'):
         """보이지않아짐"""
-        msg = await ctx.send('보이지않아')
-        for i in range(3, 8):
-            time.sleep(0.3)
-            content = '||보이지않아'
-            await msg.edit(content=content[:i]+'||'+content[i:])
+        valid_emojis = []
+        pattern = re.compile(r'(<a?:\w*:(\d*)>)')
+        emojis_string_id = set(pattern.findall(arg))
+        for emoji in emojis_string_id:
+            if self.bot.get_emoji(int(emoji[1])):
+                valid_emojis.append(emoji[0])
+            else:
+                arg = re.sub(rf'<a?:\w*:{emoji[1]}>', '▪', arg)
+
+        actual_len = len(re.sub(r'(<a?:\w*:(\d*)>)', '0', arg))
+        if actual_len > 50:
+            await ctx.send('어이! 너무 길다구!')
+            return
+        msg = await ctx.send(arg)
+
+        passing_emoji = False
+        for i in range(len(arg)):
+            if i < len(arg) and arg[i] == '<':
+                for emoji in valid_emojis:
+                    if arg[i:].startswith(emoji):
+                        passing_emoji = True
+            elif passing_emoji and arg[i] == '>':
+                passing_emoji = False
+
+            if not passing_emoji:
+                time.sleep(60 / 145)  # BPM 145
+                await msg.edit(content='||'+arg[:i+1]+'||'+arg[i+1:])
 
     @commands.command(name='말해줘')
     async def speak(self, ctx, *content):
