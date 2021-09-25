@@ -69,9 +69,9 @@ class Tasks(commands.Cog):
             img.save(f'data/daily_arrest-out.jpg', 'JPEG')
 
         now = dt.datetime.now().strftime('%y%m%d')
-        message = await channel.send(member.mention, file=discord.File(
-                f'data/daily_arrest-out.jpg', f'{now}.jpg'
-            ))
+        message = await channel.send(
+            member.mention+' 체포 @here',
+            file=discord.File(f'data/daily_arrest-out.jpg', f'{now}.jpg'))
 
         # 체포 역할 생성
         arrested_role = await guild.create_role(
@@ -94,7 +94,7 @@ class Tasks(commands.Cog):
         for role in temp_roles:
             await member.add_roles(role)
         await arrested_role.delete()
-        await message.edit(content=member.mention+' (석방됨)')
+        await message.edit(content=message.content+' (석방됨)')
 
 
 async def _archive_msg(bot, dest: discord.abc.Messageable,
