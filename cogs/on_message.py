@@ -1,6 +1,7 @@
 import random
 
 import discord
+from discord import Message, File
 from discord.ext import commands
 
 from utils import default, pingpong
@@ -12,7 +13,7 @@ class OnMessage(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message: Message):
         if not isinstance(message.channel, discord.TextChannel):
             return
 
@@ -63,11 +64,17 @@ async def pingpong_chat(message):
 
 
 async def dont_use_tq(message):
-    if message.content == 'ㅅㅂ' and random.random() < 0.5:
-        await message.channel.send(
-            file=discord.File('data/dont_use_tq.png', 'tq.png'),
-            reference=message
-        )
+    if message.content == 'ㅅㅂ':
+        rand = random.random()
+        if rand < 0.01:
+            img = 'dont_use_tq_alt.jpg'
+        elif rand < 0.2:
+            img = 'dont_use_tq.png'
+        else:
+            return
+
+        await message.channel.send(file=File('data/'+img, 'tq.'+img[-3:]),
+                                   reference=message)
 
 
 def setup(bot):

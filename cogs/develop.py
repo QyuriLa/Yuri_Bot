@@ -12,7 +12,7 @@ class DevelopCommands(commands.Cog):
 
     @commands.command(hidden=True)
     async def refresh_config(self, ctx: commands.Context):
-        if not ctx.bot.is_owner(ctx.author):
+        if not await ctx.bot.is_owner(ctx.author):
             await ctx.message.delete()
             return await ctx.send('그건 관리자 전용 명령어야!', delete_after=5)
 
