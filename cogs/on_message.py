@@ -24,7 +24,7 @@ class OnMessage(commands.Cog):
 
 
 async def react_to_chito(message):
-    chito = ['치토', '치이짱', '치이쨩']
+    chito = ['치토', '치이짱', '치이쨩', '치짱', '치쨩']
     for i in chito:
         if i in message.content:
             await message.add_reaction('❤')
