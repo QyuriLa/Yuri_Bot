@@ -10,7 +10,7 @@ class DevelopCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def refresh_config(self, ctx: commands.Context):
         if not ctx.bot.is_owner(ctx.author):
             await ctx.message.delete()
