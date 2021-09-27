@@ -1,3 +1,5 @@
+import random
+
 import discord
 from discord.ext import commands
 
@@ -10,7 +12,7 @@ class OnMessage(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if not isinstance(message.channel, discord.TextChannel):
             return
 
@@ -22,9 +24,12 @@ class OnMessage(commands.Cog):
         if message.channel.id in self.config["pingpong_channels"]:
             await pingpong_chat(message)
 
+        if message.guild.id in self.config["dont_use_tq_guilds"]:
+            await dont_use_tq(message)
+
 
 async def react_to_chito(message):
-    chito = ['치토', '치이짱', '치이쨩']
+    chito = ['치토', '치이짱', '치이쨩', '치짱', '치쨩']
     for i in chito:
         if i in message.content:
             await message.add_reaction('❤')
@@ -55,6 +60,14 @@ async def pingpong_chat(message):
         elif reply['type'] == 'image':
             content = reply['image']['url']
         await message.channel.send(content if content else '⚠')
+
+
+async def dont_use_tq(message):
+    if message.content == 'ㅅㅂ' and random.random() < 0.5:
+        await message.channel.send(
+            file=discord.File('data/dont_use_tq.png', 'tq.png'),
+            reference=message
+        )
 
 
 def setup(bot):

@@ -82,6 +82,7 @@ class BasicCommands(commands.Cog):
                 limit=num, before=ctx.message.created_at):
             messages.append(message)
         await ctx.channel.delete_messages(messages)
+        await ctx.send(f'{num}개의 메시지를 삭제했어!')
 
     @commands.command(name='대화하자')
     async def talk(self, ctx):

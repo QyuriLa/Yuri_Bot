@@ -41,7 +41,7 @@ class Examples(commands.Cog):
         """Says when a member joined."""
         await ctx.send('{0.name} joined in {0.joined_at}'.format(member))
 
-    @commands.group()
+    @commands.group(hidden=True)
     async def cool(self, ctx):
         """Says if a user is cool.
         In reality this just checks if a subcommand is being invoked.

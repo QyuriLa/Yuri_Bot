@@ -66,12 +66,12 @@ class Tasks(commands.Cog):
             font = ImageFont.truetype('data/NanumSquareB.ttf', 90)
             draw.text((1420, 950), f'{member.display_name}',
                       font=font, anchor='rs', stroke_width=5, stroke_fill=0)
-            img.save(f'data/daily_arrest-out.jpg', 'JPEG')
+            img.save('data/daily_arrest-out.jpg', 'JPEG')
 
         now = dt.datetime.now().strftime('%y%m%d')
         message = await channel.send(
             member.mention+' 체포 @here',
-            file=discord.File(f'data/daily_arrest-out.jpg', f'{now}.jpg'))
+            file=discord.File('data/daily_arrest-out.jpg', f'{now}.jpg'))
 
         # 체포 역할 생성
         arrested_role = await guild.create_role(
