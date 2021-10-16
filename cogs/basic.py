@@ -101,7 +101,9 @@ class BasicCommands(commands.Cog):
     async def delete_scams(self, ctx: commands.Context):
         """스팸 메시지에 답장으로 이 커맨드를 달면 전부 지워줄게!"""
         if not ctx.message.reference:
-            await ctx.send('스팸 정리 기능을 이용하려면, 지우려는 스팸 메시지 중 하나에 답장으로 이 명령어를 다시 입력해줘!')
+             return await ctx.send(
+                 '스팸 정리 기능을 이용하려면, 지우려는 스팸 메시지 중 하나에 답장으로 이 명령어를 다시 입력해줘!'
+             )
 
         embed = discord.Embed(
             title='스팸 메시지 일괄 삭제',
