@@ -5,7 +5,7 @@ import re
 import discord
 from discord.ext import commands
 
-from utils import default
+from utils import default, ui
 
 
 class BasicCommands(commands.Cog):
@@ -89,28 +89,64 @@ class BasicCommands(commands.Cog):
         """핑퐁 빌더 챗봇 안내 임베드를 출력해 줄게!"""
         channels = filter(lambda x: x.id in self.config["pingpong_channels"],
                           ctx.guild.channels)
-        embed = discord.Embed(title='좋아, 이야기하자!', colour=14669221)
-        embed.add_field(name='이용 방법',
-                        value='- 지정 채널에서 말을 걸면 내가 답장을 해 줄거야!\n'
-                              '- 혼잣말을 하고 싶으면 앞에 `!`를 덧붙여!\n'
-                              '- 말을 너무 많이 시키면 지쳐서 답장을 못하게 될지도...\n'
-                              '- 다른 봇이나 나를 위한 명령어에는 답장하지 않아!',
-                        inline=False)
-        embed.add_field(name='지정 채널',
-                        value=' / '.join(map(lambda x: x.mention, channels))
-                              or '`(발견되지 않음)`',
-                        inline=False)
-        embed.add_field(name='베타 안내',
-                        value='지금은 챗봇 API의 샘플을 그대로 쓰고 있어서, '
-                              '유리가 아니라 범용 챗봇이 이야기해주는 느낌이 들 거야.'
-                              '나중에는 바뀔 테니까 기대해 줘!',
-                        inline=False)
-        embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/738942382762098728/a33a31dae3335605c3795317a1d356c3.webp?size=1024')
+        embed = talk_embed(channels)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=default.config()['other_bot_cmds'])
     async def other_bot_commands(self, ctx):
+        """뭐"""
         await ctx.send('뭐')
+
+    @commands.command(name='스팸정리', aliases=['스팸'])
+    async def delete_scams(self, ctx: commands.Context):
+        """스팸 메시지에 답장으로 이 커맨드를 달면 전부 지워줄게!"""
+        embed = discord.Embed(
+            title='스팸 메시지 일괄 삭제',
+            description='답장으로 가리킨 메시지와 같은 시간대에 전송된 똑같은 메시지들을 삭제할 거야.\n'
+                        '계속하려면 아래 **확인** 버튼을 눌러 줘!'
+        )
+        view = ui.ConfirmView(ctx)
+        cmd_msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+        if not view.value:
+            return await cmd_msg.edit(
+                content='스팸정리를 취소했어!',
+                embed=None, view=None
+            )
+
+        counter = 0
+        ref = ctx.message.reference.resolved
+        for channel in filter(lambda x: isinstance(x, discord.TextChannel),
+                              ctx.guild.channels):
+            async for msg in channel.history(limit=11, around=ref.created_at):
+                if msg.author == ref.author and msg.content == ref.content:
+                    await msg.delete()
+                    counter += 1
+        await cmd_msg.edit(
+            content=f'총 {counter}개의 채널에서 스팸 메시지를 삭제했어!',
+            embed=None, view=None
+        )
+
+
+def talk_embed(channels):
+    embed = discord.Embed(title='좋아, 이야기하자!', colour=14669221)
+    embed.add_field(name='이용 방법',
+                    value='- 지정 채널에서 말을 걸면 내가 답장을 해 줄거야!\n'
+                          '- 혼잣말을 하고 싶으면 앞에 `!`를 덧붙여!\n'
+                          '- 말을 너무 많이 시키면 지쳐서 답장을 못하게 될지도...\n'
+                          '- 다른 봇이나 나를 위한 명령어에는 답장하지 않아!',
+                    inline=False)
+    embed.add_field(name='지정 채널',
+                    value=' / '.join(map(lambda x: x.mention, channels))
+                          or '`(발견되지 않음)`',
+                    inline=False)
+    embed.add_field(name='베타 안내',
+                    value='지금은 챗봇 API의 샘플을 그대로 쓰고 있어서, '
+                          '유리가 아니라 범용 챗봇이 이야기해주는 느낌이 들 거야.'
+                          '나중에는 바뀔 테니까 기대해 줘!',
+                    inline=False)
+    embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/738942382762098728/a33a31dae3335605c3795317a1d356c3.webp?size=1024')
+    return embed
 
 
 def setup(bot):
