@@ -25,11 +25,10 @@ class Events(commands.Cog):
 
             if "2000 or fewer" in str(err) and len(ctx.message.clean_content) > 1900:
                 return await ctx.send(
-                    "You attempted to make the command display more than 2,000 characters...\n"
-                    "Both error and command will be ignored."
+                    "출력하려는 내용이 2000자가 넘어서 에러를 냈어..."
                 )
 
-            await ctx.send(f"There was an error processing the command ;-;\n{error}")
+            await ctx.send(f"이런, 에러가 발생했어...\n{error}")
 
         elif isinstance(err, errors.CheckFailure):
             pass
@@ -44,16 +43,9 @@ class Events(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        if not self.config["join_message"]:
-            return
-
-        try:
-            to_send = sorted([chan for chan in guild.channels if chan.permissions_for(guild.me).send_messages and isinstance(chan, discord.TextChannel)], key=lambda x: x.position)[0]
-        except IndexError:
-            pass
-        else:
-            await to_send.send(self.config["join_message"])
+    async def on_guild_join(self, guild: discord.Guild):
+        # init_config(guild.id)
+        pass
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
